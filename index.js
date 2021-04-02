@@ -30,7 +30,7 @@ client.connect(err => {
   })
 
   app.get('/product/:id', (req, res) => {
-    productCollection.find({ id: req.params._id })
+    productCollection.find({_id: ObjectID(req.params.id) })
       .toArray((err, items) => {
         res.send(items[0])
       })
@@ -48,16 +48,15 @@ client.connect(err => {
   console.log('database connected')
 
   app.delete('/delete/:id', (req, res) => {
-    // console.log(req.params.id);
-    productCollection.deleteOne({ id: req.params._id })
+    console.log(req.params.id);
+    productCollection.deleteOne({_id: ObjectID(req.params.id) })
       .then(result => {
-        console.log(result);
+        // console.log(result)
+        res.send(result.deletedCount > 0);
       })
   })
   // client.close();
 });
 
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+app.listen(process.env.PORT || port)
