@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const MongoClient = require('mongodb').MongoClient;
+const ObjectID = require('mongodb').ObjectID;
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config()
@@ -21,23 +22,38 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
   const productCollection = client.db("onlineStore").collection("onlineProducts");
 
-  app.get('/products', (req, res)=> {
-    productCollection.find()
-    .toArray((err, items) => {
-      res.send(items)
-    })
+  app.get('/products', (req, res) => {
+    productCollection.find({})
+      .toArray((err, items) => {
+        res.send(items)
+      })
   })
 
-  app.post('/addProduct', (req, res) =>{
+  app.get('/product/:id', (req, res) => {
+    productCollection.find({ id: req.params._id })
+      .toArray((err, items) => {
+        res.send(items[0])
+      })
+  })
+
+  app.post('/addProduct', (req, res) => {
     const newProduct = req.body;
     console.log('adding new product', newProduct)
     productCollection.insertOne(newProduct)
-    .then(result => {
-      console.log('inserted count',result.insertedCount)
-      res.send(result.insertedCount > 0)
-    })
+      .then(result => {
+        console.log('inserted count', result.insertedCount)
+        res.send(result.insertedCount > 0)
+      })
   })
   console.log('database connected')
+
+  app.delete('/delete/:id', (req, res) => {
+    // console.log(req.params.id);
+    productCollection.deleteOne({ id: req.params._id })
+      .then(result => {
+        console.log(result);
+      })
+  })
   // client.close();
 });
 
